@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Compiladores Practica 1-EH</string>
+    <string name="tab_flowchart">Diagrama</string>
+    <string name="tab_operators">Operadores</string>
+    <string name="tab_control">Control</string>
+    <string name="tab_errors">Errores</string>
+    <string name="btn_compile">COMPILAR</string>
+</resources>

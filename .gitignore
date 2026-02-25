@@ -1,0 +1,16 @@
+# Entorno local
+/local.properties
+/.idea/
+/shelf/
+/workspace.xml
+.DS_Store
+
+# Archivos de compilación de Gradle
+.gradle/
+/build/
+/app/build/
+
+# Archivos autogenerados (Android)
+*.iml
+*.ap_
+*.aab

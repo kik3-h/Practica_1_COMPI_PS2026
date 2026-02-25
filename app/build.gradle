@@ -1,0 +1,95 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+// ── Paths Simplificados ──────────────────────────────────────────
+def jflexJar        = file("libs/jflex-full-1.9.1.jar")
+def cupJar          = file("libs/java-cup-11b.jar")
+def cupRuntimeJar   = file("libs/java-cup-11b-runtime.jar")
+
+// Asumiendo que crearás estas carpetas jflex y cup en src/main/
+def jflexInput      = file("src/main/jflex/Lexer.flex")
+def cupInput        = file("src/main/cup/parser.cup")
+
+// La carpeta donde caerá el código Java generado, según tu imagen
+def generatedDir    = file("src/main/java/com/compiladores/practica1/generated")
+
+// ── Tarea para ejecutar JFlex ────────────────────────────────────
+task generateLexer(type: JavaExec) {
+    group = "compiler"
+    classpath = files(jflexJar)
+    mainClass = "jflex.Main"
+    // Usamos -d para indicarle a JFlex el directorio de salida exacto
+    args = [
+            "-d", generatedDir.absolutePath,
+            jflexInput.absolutePath
+    ]
+    inputs.file jflexInput
+    outputs.dir generatedDir
+    doFirst { generatedDir.mkdirs() }
+}
+
+// ── Tarea para ejecutar CUP ──────────────────────────────────────
+task generateParser(type: JavaExec) {
+    group = "compiler"
+    classpath = files(cupJar)
+    mainClass = "java_cup.Main"
+    args = [
+            "-parser",   "Parser", // Con mayúscula por convención
+            "-symbols",  "sym",
+            "-destdir",  generatedDir.absolutePath,
+            cupInput.absolutePath
+    ]
+    inputs.file cupInput
+    outputs.dir generatedDir
+    doFirst { generatedDir.mkdirs() }
+}
+
+// ── Enlazar tareas antes de compilar ─────────────────────────────
+// Esto fuerza a que Android Studio SIEMPRE corra JFlex y CUP antes de compilar Kotlin/Java
+tasks.named("preBuild") {
+    dependsOn generateLexer, generateParser
+}
+
+android {
+    namespace 'com.compiladores.practica1'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.compiladores.practica1"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    // CUP runtime (obligatorio para que el Parser generado funcione)
+    implementation files(cupRuntimeJar)
+
+    // AndroidX / Material
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+}
