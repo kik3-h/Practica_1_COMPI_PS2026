@@ -6,9 +6,7 @@ import com.compiladores.practica1.generated.Parser
 import com.compiladores.practica1.reports.*
 import java.io.StringReader
 
-// ─────────────────────────────────────────────────────────────────
-// CompileResult – everything the UI needs
-// ─────────────────────────────────────────────────────────────────
+// esta clase es lo que la interfaz necesita para funcionar
 
 data class CompileResult(
     val errors: List<ErrorReport>,
@@ -20,16 +18,15 @@ data class CompileResult(
     val hasErrors: Boolean get() = errors.isNotEmpty()
 }
 
-/** Maps element index (1-based) to its resolved ElementStyle */
+/** Asigna el indice del elemento (basado en 1) a su ElementStyle */
 typealias StyleMap = Map<Int, ElementStyle>
 
-// ─────────────────────────────────────────────────────────────────
-// Main Compiler façade
-// ─────────────────────────────────────────────────────────────────
-
+// lo visual principal del compilador
 object Compiler {
 
     fun compile(source: String): CompileResult {
+        val er = Regex("[\\u200B-\\u200D\\uFEFF\\p{C}&&[^\\n\\r\\t]]")
+        val cleanSource = source.replace(er, "")
         // 1. Lex + Parse
         val reader = StringReader(source)
         val lexer  = Lexer(reader)
@@ -41,7 +38,7 @@ object Compiler {
             null
         }
 
-        // 2. Collect errors (lexer errors + parser errors)
+        // aca es donde se recopilan errores
         val errors = mutableListOf<ErrorReport>()
         errors += lexer.errors
         errors += par.errors
@@ -51,21 +48,17 @@ object Compiler {
             return CompileResult(errors, null, emptyList(), emptyList(), emptyMap())
         }
 
-        // 3. Walk AST → build reports
+        // aca se generan informes
         val opReports      = mutableListOf<OperatorReport>()
         val controlReports = mutableListOf<ControlReport>()
 
         walkAlgo(program.algo.stmts, opReports, controlReports)
 
-        // 4. Resolve styles from config section
+        // configuracion de estilos
         val styles = resolveStyles(program.config)
 
         return CompileResult(emptyList(), program, opReports, controlReports, styles)
     }
-
-    // ─────────────────────────────────────────────────────────
-    // AST walker
-    // ─────────────────────────────────────────────────────────
 
     private fun walkAlgo(
         stmts: List<StmtNode>,
@@ -80,7 +73,7 @@ object Compiler {
                 is IfNode       -> {
                     collectCondOps(stmt.condition, ops)
                     controls += ControlReport("SI", stmt.line, conditionText(stmt.condition))
-                    walkAlgo(stmt.body, ops, controls)   // walk body (no nesting enforced by grammar)
+                    walkAlgo(stmt.body, ops, controls)   // el recorrido sin anidacion impuesta por la gramatica
                 }
                 is WhileNode    -> {
                     collectCondOps(stmt.condition, ops)
@@ -91,7 +84,7 @@ object Compiler {
             }
         }
     }
-
+//detecto operadores
     private fun collectOps(expr: ExprNode, ops: MutableList<OperatorReport>) {
         when (expr) {
             is BinOpNode -> {
@@ -116,10 +109,7 @@ object Compiler {
         }
     }
 
-    // ─────────────────────────────────────────────────────────
-    // Text reconstruction helpers
-    // ─────────────────────────────────────────────────────────
-
+//generacion del texto
     fun exprText(expr: ExprNode): String = when (expr) {
         is BinOpNode        -> "${exprText(expr.left)} ${expr.op} ${exprText(expr.right)}"
         is NegNode          -> "-${exprText(expr.expr)}"
@@ -137,13 +127,10 @@ object Compiler {
         else         -> "?"
     }
 
-    // ─────────────────────────────────────────────────────────
-    // Style resolution
-    // ─────────────────────────────────────────────────────────
+    // Resoluciones del estilo
 
     private fun resolveStyles(cfg: ConfigSection): StyleMap {
-        // Count how many SI / MIENTRAS / BLOQUEs we have (to validate indices)
-        // For now we apply styles to a shared map indexed per element occurrence
+        // aca se cuenta cuantas condiciones o ciclos hay para validar
         val map = mutableMapOf<Int, ElementStyle>()
 
         fun getOrDefault(idx: Int): ElementStyle =

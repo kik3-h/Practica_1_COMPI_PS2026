@@ -5,9 +5,6 @@ import com.compiladores.practica1.ast.*;
 import com.compiladores.practica1.reports.*;
 import java.util.*;
 
-/* ═══════════════════════════════════════════════════════════
-   CUP Parser – Practica 1 Compiladores
-   ═══════════════════════════════════════════════════════════ */
 
 parser code {:
     private List<ErrorReport> errors = new ArrayList<>();
@@ -33,7 +30,6 @@ parser code {:
     }
 :};
 
-/* ── Terminal symbols ── */
 terminal            INICIO, FIN, VAR, SI, ENTONCES, FINSI;
 terminal            MIENTRAS, HACER, FINMIENTRAS, MOSTRAR, LEER;
 terminal            PLUS, MINUS, TIMES, DIVIDE;
@@ -44,7 +40,6 @@ terminal            SEPARATOR;
 terminal            PIPE, COMMA;
 terminal	        UMINUS;
 
-/* Config instruction terminals */
 terminal CFG_DEFAULT, CFG_COLOR_TEXTO_SI, CFG_COLOR_SI;
 terminal CFG_FIGURA_SI, CFG_LETRA_SI, CFG_LETRA_SIZE_SI;
 terminal CFG_COLOR_TEXTO_MIENTRAS, CFG_COLOR_MIENTRAS;
@@ -56,7 +51,6 @@ terminal String  ID, STRING, FIGURA_NAME, LETRA_NAME, HEX_COLOR;
 terminal Integer INTEGER;
 terminal Double  DECIMAL;
 
-/* ── Non-terminals ── */
 non terminal ProgramNode          program;
 non terminal AlgoSection          algo_section;
 non terminal ConfigSection        config_section;
@@ -78,7 +72,6 @@ non terminal ConfigInstr          config_instr;
 non terminal ColorValue           color_value;
 non terminal Double               num_expr, num_term, num_factor;
 
-/* ── Precedence ── */
 precedence left OR;
 precedence left AND;
 precedence right NOT;
@@ -86,18 +79,13 @@ precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
 precedence right UMINUS;
 
-/* ═══════════════════════════════════════════
-   Start
-   ═══════════════════════════════════════════ */
+
 start with program;
 
 program ::= algo_section:a SEPARATOR config_section:c
             {: RESULT = new ProgramNode(a, c); :}
           ;
 
-/* ═══════════════════════════════════════════
-   Algorithm Section
-   ═══════════════════════════════════════════ */
 algo_section ::= INICIO stmt_list:sl FIN
                  {: RESULT = new AlgoSection(sl); :}
                ;
@@ -116,33 +104,28 @@ stmt ::= var_decl:v    {: RESULT = v; :}
        | read_stmt:r   {: RESULT = r; :}
        ;
 
-/* Variable declaration */
 var_decl ::= VAR ID:id
              {: RESULT = new VarDeclNode(id, null, idleft, idright); :}
            | VAR ID:id ASSIGN expr:e
              {: RESULT = new VarDeclNode(id, e, idleft, idright); :}
            ;
 
-/* Assignment */
 assignment ::= ID:id ASSIGN expr:e
                {: RESULT = new AssignNode(id, e, idleft, idright); :}
              ;
 
-/* If – both FINSI and FIN SI */
 if_stmt ::= SI:s LPAREN condition:c RPAREN ENTONCES block:b FINSI
             {: RESULT = new IfNode(c, b, sleft, sright); :}
           | SI:s LPAREN condition:c RPAREN ENTONCES block:b FIN SI
             {: RESULT = new IfNode(c, b, sleft, sright); :}
           ;
 
-/* While – both FINMIENTRAS and FIN MIENTRAS */
 while_stmt ::= MIENTRAS:m LPAREN condition:c RPAREN HACER block:b FINMIENTRAS
                {: RESULT = new WhileNode(c, b, mleft, mright); :}
              | MIENTRAS:m LPAREN condition:c RPAREN HACER block:b FIN MIENTRAS
                {: RESULT = new WhileNode(c, b, mleft, mright); :}
              ;
 
-/* Block: only VAR, assignment, MOSTRAR, LEER */
 block ::= block_list:bl {: RESULT = bl; :}
         ;
 
@@ -158,21 +141,16 @@ block_stmt ::= var_decl:v   {: RESULT = v; :}
              | read_stmt:r  {: RESULT = r; :}
              ;
 
-/* Show */
 show_stmt ::= MOSTRAR:m STRING:s
               {: RESULT = new ShowNode(new StringLiteralNode(s, mleft, mright), mleft, mright); :}
             | MOSTRAR:m expr:e
               {: RESULT = new ShowNode(e, mleft, mright); :}
             ;
 
-/* Read */
 read_stmt ::= LEER:l ID:id
               {: RESULT = new ReadNode(id, lleft, lright); :}
             ;
 
-/* ═══════════════════════════════════════════
-   Conditions
-   ═══════════════════════════════════════════ */
 condition ::= expr:l EQ:op  expr:r  {: RESULT = new RelOpNode("==", l, r, opleft, opright); :}
             | expr:l NEQ:op expr:r  {: RESULT = new RelOpNode("!=", l, r, opleft, opright); :}
             | expr:l GT:op  expr:r  {: RESULT = new RelOpNode(">",  l, r, opleft, opright); :}
@@ -185,9 +163,6 @@ condition ::= expr:l EQ:op  expr:r  {: RESULT = new RelOpNode("==", l, r, opleft
             | LPAREN condition:c RPAREN {: RESULT = c; :}
             ;
 
-/* ═══════════════════════════════════════════
-   Arithmetic expressions
-   ═══════════════════════════════════════════ */
 expr ::= expr:l PLUS:op  term:r  {: RESULT = new BinOpNode("+", l, r, opleft, opright); :}
        | expr:l MINUS:op term:r  {: RESULT = new BinOpNode("-", l, r, opleft, opright); :}
        | term:t                  {: RESULT = t; :}
@@ -205,9 +180,6 @@ factor ::= INTEGER:n           {: RESULT = new IntLiteralNode(n, nleft, nright);
          | MINUS:m factor:f    {: RESULT = new NegNode(f, mleft, mright); :} %prec UMINUS
          ;
 
-/* ═══════════════════════════════════════════
-   Config Section
-   ═══════════════════════════════════════════ */
 config_section ::= config_list:cl {: RESULT = new ConfigSection(cl); :}
                  ;
 
@@ -267,14 +239,12 @@ config_instr ::=
     {: RESULT = new ConfigInstr("LETRA_SIZE_BLOQUE", v, idx.intValue(), cleft, cright); :}
   ;
 
-/* Color value: rgb (3 num_expr separated by commas) OR hexadecimal */
 color_value ::= num_expr:r COMMA num_expr:g COMMA num_expr:b
                 {: RESULT = new ColorValue(r.intValue(), g.intValue(), b.intValue(), null); :}
               | HEX_COLOR:h
                 {: RESULT = new ColorValue(h); :}
               ;
 
-/* Numeric expression in config section */
 num_expr ::= num_expr:l PLUS  num_term:r  {: RESULT = l + r; :}
            | num_expr:l MINUS num_term:r  {: RESULT = l - r; :}
            | num_term:t                   {: RESULT = t; :}

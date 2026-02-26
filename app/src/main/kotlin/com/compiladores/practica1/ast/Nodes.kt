@@ -1,18 +1,10 @@
 package com.compiladores.practica1.ast
 
-// ─────────────────────────────────────────────────────────────────
-// Base types
-// ─────────────────────────────────────────────────────────────────
-
 abstract class ASTNode(val line: Int = 0, val col: Int = 0)
 
 abstract class StmtNode(line: Int = 0, col: Int = 0) : ASTNode(line, col)
 abstract class ExprNode(line: Int = 0, col: Int = 0) : ASTNode(line, col)
 abstract class CondNode(line: Int = 0, col: Int = 0) : ASTNode(line, col)
-
-// ─────────────────────────────────────────────────────────────────
-// Program / Sections
-// ─────────────────────────────────────────────────────────────────
 
 class ProgramNode(
     val algo: AlgoSection,
@@ -22,10 +14,6 @@ class ProgramNode(
 class AlgoSection(val stmts: List<StmtNode>) : ASTNode()
 
 class ConfigSection(val instrs: List<ConfigInstr>) : ASTNode()
-
-// ─────────────────────────────────────────────────────────────────
-// Statements
-// ─────────────────────────────────────────────────────────────────
 
 class VarDeclNode(
     val name: String,
@@ -61,10 +49,6 @@ class ReadNode(
     line: Int = 0, col: Int = 0
 ) : StmtNode(line, col)
 
-// ─────────────────────────────────────────────────────────────────
-// Expressions
-// ─────────────────────────────────────────────────────────────────
-
 class BinOpNode(
     val op: String,
     val left: ExprNode,
@@ -78,10 +62,6 @@ class IntLiteralNode(val value: Int, line: Int = 0, col: Int = 0) : ExprNode(lin
 class DecLiteralNode(val value: Double, line: Int = 0, col: Int = 0) : ExprNode(line, col)
 class StringLiteralNode(val value: String, line: Int = 0, col: Int = 0) : ExprNode(line, col)
 class IdNode(val name: String, line: Int = 0, col: Int = 0) : ExprNode(line, col)
-
-// ─────────────────────────────────────────────────────────────────
-// Conditions
-// ─────────────────────────────────────────────────────────────────
 
 class RelOpNode(
     val op: String,
@@ -99,9 +79,6 @@ class LogOpNode(
 
 class NotNode(val cond: CondNode, line: Int = 0, col: Int = 0) : CondNode(line, col)
 
-// ─────────────────────────────────────────────────────────────────
-// Config Section helpers
-// ─────────────────────────────────────────────────────────────────
 
 data class ColorValue(
     val r: Int = 0,
@@ -119,14 +96,13 @@ data class ColorValue(
 }
 
 data class ConfigInstr(
-    val command: String,      // e.g. "COLOR_TEXTO_SI"
-    val value: Any?,          // ColorValue | String | Double | null
-    val index: Int,           // 1-based index
+    val command: String,      // "COLOR_TEXTO_SI"
+    val value: Any?,          // ColorValue, String , Double , null
+    val index: Int,           // 1-base
     val line: Int = 0,
     val col: Int = 0
 )
 
-/** Resolved style for a single flowchart element */
 data class ElementStyle(
     var textColor: Int = android.graphics.Color.BLACK,
     var bgColor: Int = android.graphics.Color.WHITE,

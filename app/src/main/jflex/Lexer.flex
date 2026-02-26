@@ -42,22 +42,17 @@ HexColor       = H[0-9A-Fa-f]{6}
 
 %%
 
-/* ─── Comments & whitespace (both sections) ─── */
 <YYINITIAL, CONFIG> {
     {Comment}       { /* ignore */ }
     {WhiteSpace}    { /* ignore */ }
 }
 
-/* ─── Section separator ─── */
 <YYINITIAL> {
     "%%%%"          { yybegin(CONFIG); return sym(sym.SEPARATOR); }
 }
 
-/* ══════════════════════════════════════════
-   SECTION 1 – Algorithm / Pseudocode
-   ══════════════════════════════════════════ */
+
 <YYINITIAL> {
-    /* Keywords */
     "INICIO"        { return sym(sym.INICIO); }
     "FIN"           { return sym(sym.FIN); }
     "VAR"           { return sym(sym.VAR); }
@@ -70,13 +65,11 @@ HexColor       = H[0-9A-Fa-f]{6}
     "MOSTRAR"       { return sym(sym.MOSTRAR); }
     "LEER"          { return sym(sym.LEER); }
 
-    /* Arithmetic */
     "+"             { return sym(sym.PLUS); }
     "-"             { return sym(sym.MINUS); }
     "*"             { return sym(sym.TIMES); }
     "/"             { return sym(sym.DIVIDE); }
 
-    /* Relational */
     "=="            { return sym(sym.EQ); }
     "!="            { return sym(sym.NEQ); }
     ">="            { return sym(sym.GTE); }
@@ -84,17 +77,14 @@ HexColor       = H[0-9A-Fa-f]{6}
     ">"             { return sym(sym.GT); }
     "<"             { return sym(sym.LT); }
 
-    /* Logical */
     "&&"            { return sym(sym.AND); }
     "||"            { return sym(sym.OR); }
     "!"             { return sym(sym.NOT); }
 
-    /* Delimiters */
     "="             { return sym(sym.ASSIGN); }
     "("             { return sym(sym.LPAREN); }
     ")"             { return sym(sym.RPAREN); }
 
-    /* Literals */
     {DecLit}        { return sym(sym.DECIMAL,  Double.parseDouble(yytext())); }
     {IntLit}        { return sym(sym.INTEGER,  Integer.parseInt(yytext())); }
     {StringLit}     { return sym(sym.STRING,   yytext().substring(1, yytext().length()-1)); }
@@ -107,11 +97,9 @@ HexColor       = H[0-9A-Fa-f]{6}
                     }
 }
 
-/* ══════════════════════════════════════════
-   SECTION 2 – Flowchart configuration
-   ══════════════════════════════════════════ */
+
 <CONFIG> {
-    /* Config instruction names – order matters (longest match first) */
+    /* configuracion de colores segun instrucciones */
     "%COLOR_TEXTO_SI"           { return sym(sym.CFG_COLOR_TEXTO_SI); }
     "%COLOR_SI"                 { return sym(sym.CFG_COLOR_SI); }
     "%FIGURA_SI"                { return sym(sym.CFG_FIGURA_SI); }
@@ -129,7 +117,7 @@ HexColor       = H[0-9A-Fa-f]{6}
     "%LETRA_BLOQUE"             { return sym(sym.CFG_LETRA_BLOQUE); }
     "%DEFAULT"                  { return sym(sym.CFG_DEFAULT); }
 
-    /* Figure names */
+    /* nombre de figuras */
     "RECTANGULO_REDONDEADO"     { return sym(sym.FIGURA_NAME, "RECTANGULO_REDONDEADO"); }
     "PARALELOGRAMO"             { return sym(sym.FIGURA_NAME, "PARALELOGRAMO"); }
     "RECTANGULO"                { return sym(sym.FIGURA_NAME, "RECTANGULO"); }
@@ -137,18 +125,17 @@ HexColor       = H[0-9A-Fa-f]{6}
     "ELIPSE"                    { return sym(sym.FIGURA_NAME, "ELIPSE"); }
     "ROMBO"                     { return sym(sym.FIGURA_NAME, "ROMBO"); }
 
-    /* Font names */
     "TIMES_NEW_ROMAN"           { return sym(sym.LETRA_NAME, "TIMES_NEW_ROMAN"); }
     "COMIC_SANS"                { return sym(sym.LETRA_NAME, "COMIC_SANS"); }
     "VERDANA"                   { return sym(sym.LETRA_NAME, "VERDANA"); }
     "ARIAL"                     { return sym(sym.LETRA_NAME, "ARIAL"); }
 
-    /* Color / number tokens */
+    /* Color / numero del color en ansii */
     {HexColor}      { return sym(sym.HEX_COLOR, yytext().substring(1)); }
     {DecLit}        { return sym(sym.DECIMAL,   Double.parseDouble(yytext())); }
     {IntLit}        { return sym(sym.INTEGER,   Integer.parseInt(yytext())); }
 
-    /* Operators / punctuation */
+    /* Operadores / como lo llame */
     "+"             { return sym(sym.PLUS); }
     "-"             { return sym(sym.MINUS); }
     "*"             { return sym(sym.TIMES); }

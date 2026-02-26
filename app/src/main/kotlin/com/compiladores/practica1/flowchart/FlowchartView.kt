@@ -12,9 +12,7 @@ import com.compiladores.practica1.compiler.StyleMap
 import com.compiladores.practica1.compiler.CompileResult
 import kotlin.math.max
 
-// ─────────────────────────────────────────────────────────────────
-// FlowchartView – pan & zoom capable canvas
-// ─────────────────────────────────────────────────────────────────
+// esta es la clase de vista de diagrama de flujo, zoom y desplazamiento
 
 class FlowchartView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -23,7 +21,7 @@ class FlowchartView @JvmOverloads constructor(
     private var nodes: List<FlowNode> = emptyList()
     private var edges: List<FlowEdge> = emptyList()
 
-    // Pan & zoom
+    // aca se permite el desplazamiento y zoom
     private var scaleFactor = 1f
     private var translateX  = 0f
     private var translateY  = 0f
@@ -52,9 +50,7 @@ class FlowchartView @JvmOverloads constructor(
         return true
     }
 
-    // ─────────────────────────────────────────────────────────
-    // Public API
-    // ─────────────────────────────────────────────────────────
+    // La api publica
 
     fun setProgram(result: CompileResult) {
         val layout = FlowchartLayout(result)
@@ -67,10 +63,7 @@ class FlowchartView @JvmOverloads constructor(
 
     fun clear() { nodes = emptyList(); edges = emptyList(); invalidate() }
 
-    // ─────────────────────────────────────────────────────────
-    // Drawing
-    // ─────────────────────────────────────────────────────────
-
+    // aca se dibuja el diagrama
     private val arrowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.DKGRAY; strokeWidth = 2f; style = Paint.Style.STROKE
     }
@@ -99,7 +92,6 @@ class FlowchartView @JvmOverloads constructor(
 
         canvas.drawLine(x1, y1, x2, y2, arrowPaint)
 
-        // Arrow head
         val angle = Math.atan2((y2 - y1).toDouble(), (x2 - x1).toDouble())
         val arrowLen = 10f
         val arrowAngle = 0.4
@@ -116,7 +108,7 @@ class FlowchartView @JvmOverloads constructor(
         path.close()
         canvas.drawPath(path, arrowFill)
 
-        // Edge label (YES/NO for condition edges)
+        // etiquetas para bordes de condiciones si o no
         edge.label?.let {
             canvas.drawText(it, (x1 + x2) / 2f + 4, (y1 + y2) / 2f, labelPaint)
         }
@@ -157,13 +149,13 @@ class FlowchartView @JvmOverloads constructor(
                 canvas.drawPath(path, fillPaint)
                 canvas.drawPath(path, strokePaint)
             }
-            else -> { // RECTANGULO (default)
+            else -> { //por predeterminado el rectangulo
                 canvas.drawRect(rect, fillPaint)
                 canvas.drawRect(rect, strokePaint)
             }
         }
 
-        // Multi-line text
+        // texto de varias lineas
         val lines = node.label.split("\n")
         val lineH = textPaint.textSize + 2f
         val totalH = lineH * lines.size
@@ -199,9 +191,7 @@ class FlowchartView @JvmOverloads constructor(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// FlowNode & FlowEdge
-// ─────────────────────────────────────────────────────────────────
+// Nodo de flujo y sus bordes
 
 data class FlowNode(
     val id: Int,
@@ -222,9 +212,7 @@ data class FlowEdge(
     val label: String? = null
 )
 
-// ─────────────────────────────────────────────────────────────────
-// Layout builder
-// ─────────────────────────────────────────────────────────────────
+// constructor de disenios
 
 class FlowchartLayout(private val result: CompileResult) {
 
@@ -263,15 +251,15 @@ class FlowchartLayout(private val result: CompileResult) {
     private fun build() {
         val prog = result.program ?: return
 
-        // START oval
+        // aca es la figura de inicio ovalada
         val startStyle = ElementStyle(figura = "ELIPSE", bgColor = android.graphics.Color.parseColor("#90EE90"))
         val startNode  = addNode("INICIO", startStyle)
         var prev = startNode
 
-        // Walk statements
+        // Declaraciones del camino (walk)
         prev = walkStmts(prog.algo.stmts, prev)
 
-        // END oval
+        // se inserta el fin con un ovalo
         val endStyle = ElementStyle(figura = "ELIPSE", bgColor = android.graphics.Color.parseColor("#FF9999"))
         val endNode  = addNode("FIN", endStyle)
         addEdge(prev, endNode)
@@ -322,10 +310,10 @@ class FlowchartLayout(private val result: CompileResult) {
         val condNode = addNode("SI\n${com.compiladores.practica1.compiler.Compiler.conditionText(stmt.condition)}", s)
         addEdge(incoming, condNode)
 
-        // Body branch (YES)
+        // Rama del cuerpo
         val bodyLast = walkStmts(stmt.body, condNode)
 
-        // Merge point (invisible/empty node)
+        // punto de fusion nodo invisible o vacio
         val mergeStyle = ElementStyle(bgColor = android.graphics.Color.TRANSPARENT, figura = "CIRCULO")
         val mergeNode  = addNode("", mergeStyle)
 
@@ -343,10 +331,8 @@ class FlowchartLayout(private val result: CompileResult) {
 
         val bodyLast = walkStmts(stmt.body, condNode)
 
-        // Loop back edge
         addEdge(bodyLast, condNode, "SÍ")
 
-        // Exit node
         val exitStyle = ElementStyle(figura = "CIRCULO")
         val exitNode  = addNode("", exitStyle)
         addEdge(condNode, exitNode, "NO")
