@@ -13,29 +13,20 @@ import java.util.ArrayList;
 @SuppressWarnings("fallthrough")
 public class Lexer implements java_cup.runtime.Scanner {
 
-  /** This character denotes the end of file. */
   public static final int YYEOF = -1;
 
-  /** Initial size of the lookahead buffer. */
   private static final int ZZ_BUFFERSIZE = 16384;
 
   // Lexical states.
   public static final int YYINITIAL = 0;
   public static final int CONFIG = 2;
 
-  /**
-   * ZZ_LEXSTATE[l] is the state in the DFA for the lexical state l
-   * ZZ_LEXSTATE[l+1] is the state in the DFA for the lexical state l
-   *                  at the beginning of a line
-   * l is of the form l = 2*k, k a non negative integer
-   */
+
   private static final int ZZ_LEXSTATE[] = {
      0,  0,  1, 1
   };
 
-  /**
-   * Top-level table for translating characters to character classes
-   */
+
   private static final int [] ZZ_CMAP_TOP = zzUnpackcmap_top();
 
   private static final String ZZ_CMAP_TOP_PACKED_0 =
@@ -61,9 +52,7 @@ public class Lexer implements java_cup.runtime.Scanner {
   }
 
 
-  /**
-   * Second-level tables for translating characters to character classes
-   */
+
   private static final int [] ZZ_CMAP_BLOCKS = zzUnpackcmap_blocks();
 
   private static final String ZZ_CMAP_BLOCKS_PACKED_0 =
@@ -95,9 +84,7 @@ public class Lexer implements java_cup.runtime.Scanner {
     return j;
   }
 
-  /**
-   * Translates DFA states to action switch labels.
-   */
+
   private static final int [] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
@@ -138,9 +125,7 @@ public class Lexer implements java_cup.runtime.Scanner {
   }
 
 
-  /**
-   * Translates a state to a row index in the transition table
-   */
+
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
@@ -202,9 +187,7 @@ public class Lexer implements java_cup.runtime.Scanner {
     return j;
   }
 
-  /**
-   * The transition table of the DFA
-   */
+
   private static final int [] ZZ_TRANS = zzUnpacktrans();
 
   private static final String ZZ_TRANS_PACKED_0 =
@@ -332,9 +315,9 @@ public class Lexer implements java_cup.runtime.Scanner {
   }
 
 
-  /** Error code for "Unknown internal scanner error". */
+
   private static final int ZZ_UNKNOWN_ERROR = 0;
-  /** Error code for "could not match input". */
+
   private static final int ZZ_NO_MATCH = 1;
   /** Error code for "pushback value was too large". */
   private static final int ZZ_PUSHBACK_2BIG = 2;
